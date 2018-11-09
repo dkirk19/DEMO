@@ -62,6 +62,6 @@ g = Game()
 g.show_start_screen()
 while g.running:
     g.new()
-    g.show_go_screen()
+    g.show_go_scRreen()
 
 pg.quit()
