@@ -19,11 +19,21 @@ class Game:
         #init pygame and create...
 
     def new(self):
+        #add all sprites to the pg group
         self.all_sprites = pg.sprite.Group()
-        self.player = Player()
+        #create platforms group
+        self.platforms = pg.sprite.Group()
+        #add a player 1 to the group
+        self.player = Player(self)        
         self.all_sprites.add(self.player)
+        #instantiate new platform
+        for plat in PLATFORM_LIST:
+            p = Platform(*plat)
+            self.all_sprites.add(p)
+            self.platforms.add(p)
         self.run()
-        #create new player object
+        #call the run method
+        self.run()
 
     def run(self):
         self.playing = True
@@ -36,6 +46,27 @@ class Game:
 
     def update(self):
         self.all_sprites.update()
+        if self.player.vel.y > 0:
+            hits = pg.sprite.spritecollide(self.player, self.platforms, False)
+            print(hits)
+            if hits:
+                self.player.pos.y = hits[0].rect.top + 1
+                self.player.vel.y = 0
+        if self.player.rect.top <= HEIGHT / 4:
+            self.player.pos.y += abs(self.player.vel.y)
+            for plat in self.platforms:
+                plat.rect.y += abs(self.player.vel.y)
+                if plat.rect.top >= HEIGHT + 40:
+                    plat.kill()
+        while len(self.platforms) < 6:
+            width = random.randrange(50,100)
+            p = Platform(random.randrange(0,WIDTH-width), 
+                         random.randrange(-75,-30), 
+                         width, 
+                         20
+                        )
+            self.platforms.add(p)
+            self.all_sprites.add(p) 
         #update things
 
     def events(self):
@@ -45,9 +76,12 @@ class Game:
                 if self.playing:
                     self.playing = False
                 self.running = False
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_UP:
+                    self.player.jump()
 
     def draw(self):
-        self.screen.fill(REDDISH)
+        self.screen.fill(VIOLET)
         self.all_sprites.draw(self.screen)
         #double buffer
         pg.display.flip()
